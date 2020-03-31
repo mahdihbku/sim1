@@ -204,11 +204,12 @@ int main(int argc, char **argv)
 		exp_q_16[i] = (old_exp_q_16[i]+exp_q_16[i])%p;
 
 	//3.Paillier addition of enc_sec
-	Paillier_cipher ct_list[ct_count];
+	Paillier_cipher ct;
+	ct.c = BN_new();
 	for (i=0; i<ct_count; i++) {
-		ct_list[i].c = BN_new();
-		BN_bin2bn(&enc_sec[i*ct_size], ct_size, ct_list[i].c);
-		add_paillier(&ct_list[i], &ct_list[i], &old_ctx[i], &pk, ctx);
+		BN_bin2bn(&enc_sec[i*ct_size], ct_size, ct.c);
+		add_paillier(&ct, &ct, &old_ctx[i], &pk, ctx);
+		bn2binpad(ct.c, &enc_sec[i*ct_size], ct_size, big);
 	}
 
 	// 4.shrink exp_q_16 to agg_q and ct_list to enc_sec
@@ -216,7 +217,6 @@ int main(int argc, char **argv)
 	uint16_t2char(exp_q_16, agg_q, m, p_size);
 
 	for (i=0; i<ct_count; i++)
-		bn2binpad(ct_list[i].c, &enc_sec[i*ct_size], ct_size, big);
 
 	gettimeofday(&end,NULL);
 	printf("%lf\n", print_time(&start, &end));
@@ -309,6 +309,16 @@ void *sub_dec(void *vargp) {
 		bn2binpad(pt2, &dec_sec[i*bytes_per_ct], bytes_per_ct, big);
 	}
 }
+
+// void *sub_add(void *vargp) {
+// 	unsigned int myid = *((unsigned int *)vargp);
+// 	unsigned int start = myid * server_elems_per_thread;
+// 	unsigned int end = (myid != server_t - 1) ? start + server_elems_per_thread : ct_count;
+// 	BN_CTX *ctx = BN_CTX_new();
+// 	Paillier_cipher ct;
+// 	ct.c = BN_new();
+
+// }
 
 void get_indices(size_t *idx, size_t k, size_t m) {
 	unsigned char *key = "secret_seed1";
