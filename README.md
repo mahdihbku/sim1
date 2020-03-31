@@ -11,5 +11,5 @@ gcc -O3 simulation3.c -lcrypto -pthread -lm
 ./a.out 8000 1000 5 13 4
 
 ./a.out <m> <n> <k> <p_size> <car_threads> <server_threads>
-./a.out 16000 1000 7 13 1 4
+./a.out 16000 2000 7 13 1 4
 ```
