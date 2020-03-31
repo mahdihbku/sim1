@@ -163,6 +163,7 @@ int main(int argc, char **argv)
 	if (m*(p_size+n_size)/8 % bytes_per_ct != 0)
 		ct_count++;
 	car_elems_per_thread = ct_count/car_t;
+	if (ct_count%car_t != 0) car_elems_per_thread++;
 	//TODO check when the last ct contains less than blocks_per_ct blocks 
 	printf("ct_count=%u\n", ct_count);
 	enc_sec = (unsigned char *) malloc(ct_count*ct_size*sizeof(unsigned char));
@@ -234,6 +235,7 @@ int main(int argc, char **argv)
 	printf("Result decoding...\n");
 	gettimeofday(&start,NULL);
 	server_elems_per_thread = ct_count/server_t;
+	if (ct_count%server_t!= 0) server_elems_per_thread++;
 	// 1.decrypt all received ciphertexts (enc_sec) to dec_sec
 	dec_sec = (unsigned char *) malloc(m*(p_size+n_size)/8*sizeof(unsigned char));
 	for (v=0; v<server_t; v++) {
