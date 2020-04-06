@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 	car_elems_per_thread = ct_count/car_t;
 	if (ct_count%car_t != 0) car_elems_per_thread++;
 	//TODO check when the last ct contains less than blocks_per_ct blocks 
-	printf("ct_count=%u\n", ct_count);
+	// printf("ct_count=%u\n", ct_count);
 	enc_sec = (unsigned char *) malloc(ct_count*ct_size*sizeof(unsigned char));
 	int v=0;
 	for (v=0; v<car_t; v++) {
@@ -194,8 +194,8 @@ int main(int argc, char **argv)
 		encrypt_paillier(&old_ctx[i], bn_0, &pk, ctx);
 	}
 	
+	struct timeval t1, t2;
 	gettimeofday(&start,NULL);
-
 	// 1.expand rec_q to exp_q_16
 	uint16_t exp_q_16[m];
 	expand_16(q, exp_q_16, m, p_size);
@@ -203,6 +203,7 @@ int main(int argc, char **argv)
 	// 2.perform plain addition of exp_q_16
 	for (i=0; i<m; i++)
 		exp_q_16[i] = (old_exp_q_16[i]+exp_q_16[i])%p;
+	gettimeofday(&t1,NULL);
 
 	//3.Paillier addition of enc_sec
 	Paillier_cipher ct;
@@ -212,15 +213,17 @@ int main(int argc, char **argv)
 		add_paillier(&ct, &ct, &old_ctx[i], &pk, ctx);
 		bn2binpad(ct.c, &enc_sec[i*ct_size], ct_size, big);
 	}
+	gettimeofday(&t2,NULL);
 
 	// 4.shrink exp_q_16 to agg_q and ct_list to enc_sec
 	unsigned char *agg_q = (unsigned char *) malloc(m*p_size/8*sizeof(unsigned char));
 	uint16_t2char(exp_q_16, agg_q, m, p_size);
 
-	for (i=0; i<ct_count; i++)
-
 	gettimeofday(&end,NULL);
-	printf("%lf\n", print_time(&start, &end));
+	printf("  expand:%lf\n", print_time(&start, &t1));
+	printf("  add:%lf\n", print_time(&t1, &t2));
+	printf("  shrink:%lf\n", print_time(&t2, &end));
+	printf("  total:%lf\n", print_time(&start, &end));
 
 	//Correctness check. Could be removed////////////////////////////////////////
 	for (j=0; j<m; j++){
