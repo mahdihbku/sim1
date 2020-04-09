@@ -3,7 +3,7 @@
 ```bash
 gcc -O3 simulation.c -lcrypto -pthread -lm
 
-gcc -O3 simulation3.c -lcrypto -pthread -lm
+gcc -O3 simulation4.c -lcrypto -pthread -lm
 ```
 ## Usage
 ```bash
